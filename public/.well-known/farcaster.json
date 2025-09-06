@@ -1,0 +1,26 @@
+{
+  "version": "1.0.0",
+  "name": "Build Streaks",
+  "description": "Track your daily build progress and maintain your streak on Base",
+  "icon": "/icon.png",
+  "screenshot": "/screenshot.png",
+  "url": "https://buildstreaks.vercel.app",
+  "category": "productivity",
+  "tags": ["build", "streak", "productivity", "nft", "base"],
+  "developer": {
+    "name": "Build Streaks Team",
+    "url": "https://buildstreaks.vercel.app"
+  },
+  "permissions": [
+    "user:read",
+    "user:write",
+    "wallet:read",
+    "wallet:write"
+  ],
+  "features": [
+    "nft-minting",
+    "daily-logging",
+    "streak-tracking",
+    "social-sharing"
+  ]
+}

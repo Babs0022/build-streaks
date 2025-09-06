@@ -1,14 +1,25 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { Providers } from './providers';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Build Streaks - Track Your Daily Progress',
-  description: 'A Farcaster mini-app for tracking your daily build streaks on Base',
+  description: 'A Base Mini App for tracking your daily build streaks',
   viewport: 'width=device-width, initial-scale=1',
+  openGraph: {
+    title: 'Build Streaks - Track Your Daily Progress',
+    description: 'Track your daily build progress and maintain your streak on Base',
+    images: [
+      {
+        url: '/api/og',
+        width: 1200,
+        height: 630,
+        alt: 'Build Streaks - Track Your Daily Progress',
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -19,9 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Providers>
-          {children}
-        </Providers>
+        {children}
       </body>
     </html>
   );

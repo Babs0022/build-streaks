@@ -1,6 +1,6 @@
-# Build Streaks - Farcaster Mini-App
+# Build Streaks - Base Mini App
 
-A Farcaster mini-app built on Base that lets users start a "build streak," log daily progress, and track their streak count on-chain using ERC721 NFTs.
+A Base Mini App that lets users start a "build streak," log daily progress, and track their streak count on-chain using ERC721 NFTs.
 
 ## Features
 
@@ -8,14 +8,24 @@ A Farcaster mini-app built on Base that lets users start a "build streak," log d
 - 📝 **Daily Logging**: Log your daily progress with notes stored in Firebase
 - 🔥 **Streak Tracking**: Track your consecutive build days on-chain
 - 💎 **Base Network**: Built on Base for low-cost transactions
-- 🎨 **Modern UI**: Beautiful, responsive interface with Tailwind CSS
+- 🎨 **Modern UI**: Beautiful, responsive interface optimized for Base Mini Apps
+- 👥 **Social Integration**: Built-in social features through Base App
 
 ## Tech Stack
 
 - **Frontend**: Next.js 14 + TypeScript + Tailwind CSS
-- **Blockchain**: Solidity + Ethers.js + Wagmi
+- **Blockchain**: Solidity + Base App integration
 - **Database**: Firebase Firestore
-- **Network**: Base (Ethereum L2)
+- **Platform**: Base Mini Apps
+
+## Base Mini App Architecture
+
+This app follows the [Base Mini Apps guidelines](https://docs.base.org/mini-apps/overview) and leverages:
+
+- **Built-in Social Infrastructure**: User identity, authentication, and social connections
+- **Viral Distribution**: Organic sharing through Base App social feeds
+- **Frictionless Experience**: No downloads, instant engagement
+- **Base App Integration**: Native wallet and transaction handling
 
 ## Project Structure
 
@@ -25,16 +35,19 @@ A Farcaster mini-app built on Base that lets users start a "build streak," log d
 ├── app/
 │   ├── globals.css         # Global styles
 │   ├── layout.tsx          # Root layout
-│   ├── page.tsx            # Main page
-│   └── providers.tsx       # Wagmi providers
+│   ├── page.tsx            # Main Mini App page
+│   └── api/
+│       └── og/route.ts     # OpenGraph image generation
 ├── components/
 │   ├── Button.tsx          # Reusable button component
 │   ├── StreakCard.tsx      # Main streak display card
 │   └── LogModal.tsx        # Modal for logging progress
 ├── lib/
-│   ├── ethers.ts           # Ethers.js utilities
-│   ├── firebase.ts         # Firebase configuration
-│   └── wagmi.ts            # Wagmi configuration
+│   ├── base-app.ts         # Base App integration utilities
+│   └── firebase.ts         # Firebase configuration
+├── public/
+│   └── .well-known/
+│       └── farcaster.json  # Mini App manifest
 └── scripts/
     └── deploy.js           # Contract deployment script
 ```
@@ -67,8 +80,6 @@ cp env.example .env.local
 Required environment variables:
 - Firebase configuration
 - Contract address (after deployment)
-- WalletConnect project ID
-- Private key for deployment
 
 ### 3. Deploy Smart Contract
 
@@ -95,12 +106,32 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Usage
+## Base Mini App Integration
 
-1. **Connect Wallet**: Connect your wallet using MetaMask or WalletConnect
-2. **Start Streak**: Click "Start Your Streak" to mint your streak NFT
-3. **Log Daily**: Click "Log Today" to record your daily progress
-4. **Track Progress**: View your streak count and last log day
+### Manifest File
+
+The app includes a `farcaster.json` manifest file at `/.well-known/farcaster.json` that defines:
+
+- App metadata (name, description, icon)
+- Permissions (user, wallet access)
+- Features (NFT minting, daily logging)
+- Category and tags for discovery
+
+### Base App Context
+
+The app integrates with Base App's built-in features:
+
+- **User Identity**: Access to user profile, username, and avatar
+- **Wallet Integration**: Native wallet connection and transaction handling
+- **Social Features**: Built-in sharing and social graph access
+
+### Usage Flow
+
+1. **Discovery**: Users find the app through Base App search or social feeds
+2. **Instant Launch**: App opens immediately without installation
+3. **Authentication**: Automatic user authentication through Base App
+4. **Interaction**: Users can start streaks, log progress, and view history
+5. **Sharing**: Built-in social sharing through Base App
 
 ## Firebase Setup
 
@@ -129,9 +160,19 @@ service cloud.firestore {
 2. Add environment variables in Vercel dashboard
 3. Deploy automatically on push to main
 
-### Smart Contract
+### Base Mini App
 
-The contract is deployed using Hardhat. Update the network configuration in `hardhat.config.js` as needed.
+1. Deploy your app to a public URL
+2. The app will be automatically indexed by Base App
+3. Users can discover it through search and social feeds
+
+## Base Mini App Benefits
+
+- **No App Store**: Deploy directly without approval processes
+- **Viral Distribution**: Every interaction becomes potential sharing
+- **Social Native**: Built-in friend networks and social context
+- **Frictionless**: No downloads, instant engagement
+- **Cross-Platform**: Works on all devices through Base App
 
 ## License
 

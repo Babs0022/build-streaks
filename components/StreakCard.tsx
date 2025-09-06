@@ -46,57 +46,57 @@ export const StreakCard: React.FC<StreakCardProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 max-w-md mx-auto">
+    <div className="bg-white rounded-xl shadow-lg p-4 max-w-sm mx-auto">
       <div className="text-center">
-        <div className="flex items-center justify-center mb-4">
-          <Flame className={`w-8 h-8 ${getStreakColor()}`} />
-          <h2 className="text-2xl font-bold ml-2">Build Streak</h2>
+        <div className="flex items-center justify-center mb-3">
+          <Flame className={`w-6 h-6 ${getStreakColor()}`} />
+          <h2 className="text-xl font-bold ml-2">Build Streak</h2>
         </div>
         
-        <div className="mb-6">
-          <div className={`text-6xl font-bold ${getStreakColor()} mb-2`}>
+        <div className="mb-4">
+          <div className={`text-4xl font-bold ${getStreakColor()} mb-2`}>
             {streakCount}
           </div>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-600 text-sm">
             {streakCount === 1 ? 'day' : 'days'} streak
           </p>
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-xs text-gray-500 mt-1">
             {getStreakMessage()}
           </p>
         </div>
 
         {lastLogDay !== undefined && (
-          <div className="flex items-center justify-center mb-6 text-sm text-gray-500">
-            <Calendar className="w-4 h-4 mr-2" />
+          <div className="flex items-center justify-center mb-4 text-xs text-gray-500">
+            <Calendar className="w-3 h-3 mr-1" />
             Last logged: {formatLastLogDay(lastLogDay)}
           </div>
         )}
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           {!isConnected ? (
             <div className="text-center">
-              <p className="text-gray-500 mb-4">Connect your wallet to start building!</p>
+              <p className="text-gray-500 text-sm mb-2">Open in Base app to start!</p>
             </div>
           ) : streakCount === 0 ? (
             <button
               onClick={onStartStreak}
-              className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center"
+              className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-3 rounded-lg transition-colors duration-200 flex items-center justify-center text-sm"
             >
-              <Trophy className="w-5 h-5 mr-2" />
-              Start Your Streak
+              <Trophy className="w-4 h-4 mr-1" />
+              Start Streak
             </button>
           ) : (
             <button
               onClick={onLogDay}
               disabled={hasLoggedToday}
-              className={`w-full font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center ${
+              className={`w-full font-medium py-2 px-3 rounded-lg transition-colors duration-200 flex items-center justify-center text-sm ${
                 hasLoggedToday
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   : 'bg-streak-500 hover:bg-streak-600 text-white'
               }`}
             >
-              <Flame className="w-5 h-5 mr-2" />
-              {hasLoggedToday ? 'Already logged today!' : 'Log Today'}
+              <Flame className="w-4 h-4 mr-1" />
+              {hasLoggedToday ? 'Already logged!' : 'Log Today'}
             </button>
           )}
         </div>

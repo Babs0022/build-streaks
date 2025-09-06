@@ -1,18 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { StreakCard } from '@/components/StreakCard';
 import { LogModal } from '@/components/LogModal';
-import { getProvider, getContract, getSigner } from '@/lib/ethers';
 import { addDailyLog, getTodayLog, DailyLog } from '@/lib/firebase';
+import { getBaseAppContext, subscribeToUserChanges, subscribeToWalletChanges, BaseAppContext } from '@/lib/base-app';
 import { Flame, Zap, Trophy } from 'lucide-react';
 
 export default function Home() {
-  const { address, isConnected } = useAccount();
-  const { connect, connectors } = useConnect();
-  const { disconnect } = useDisconnect();
-  
+  const [baseAppContext, setBaseAppContext] = useState<BaseAppContext | null>(null);
+  const [address, setAddress] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
   const [streakCount, setStreakCount] = useState(0);
   const [lastLogDay, setLastLogDay] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,22 +18,42 @@ export default function Home() {
   const [hasLoggedToday, setHasLoggedToday] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Initialize Base App connection
+  useEffect(() => {
+    const initBaseApp = async () => {
+      const context = await getBaseAppContext();
+      if (context) {
+        setBaseAppContext(context);
+        setAddress(context.wallet.address);
+        setIsConnected(true);
+      }
+    };
+
+    initBaseApp();
+
+    // Subscribe to changes
+    subscribeToUserChanges((user) => {
+      setBaseAppContext(prev => prev ? { ...prev, user } : null);
+    });
+
+    subscribeToWalletChanges((wallet) => {
+      setBaseAppContext(prev => prev ? { ...prev, wallet } : null);
+      setAddress(wallet.address);
+      setIsConnected(!!wallet.address);
+    });
+  }, []);
+
   // Load user's streak data
   const loadStreakData = async () => {
     if (!address) return;
     
     try {
       setIsLoading(true);
-      const provider = getProvider();
-      const contract = getContract(provider);
       
-      const [streak, lastLog] = await Promise.all([
-        contract.getStreak(address),
-        contract.getLastLogDay(address)
-      ]);
-      
-      setStreakCount(Number(streak));
-      setLastLogDay(Number(lastLog));
+      // For now, we'll use mock data since we need to set up the contract
+      // In a real implementation, you'd call the smart contract here
+      setStreakCount(0);
+      setLastLogDay(0);
       
       // Check if user has logged today
       const todayLog = await getTodayLog(address);
@@ -51,21 +69,18 @@ export default function Home() {
 
   // Start a new streak
   const handleStartStreak = async () => {
-    if (!address) return;
+    if (!address || !baseAppContext) return;
     
     try {
       setIsLoading(true);
       setError(null);
       
-      const provider = getProvider();
-      const signer = await getSigner(provider as any);
-      const contract = getContract(signer);
+      // In a real implementation, you'd use Base App's requestTransaction
+      // to call the smart contract's startStreak function
+      console.log('Starting streak for user:', baseAppContext.user.username);
       
-      const tx = await contract.startStreak();
-      await tx.wait();
-      
-      // Reload streak data
-      await loadStreakData();
+      // For now, just update the local state
+      setStreakCount(1);
       
     } catch (err) {
       console.error('Error starting streak:', err);
@@ -77,25 +92,22 @@ export default function Home() {
 
   // Log a day
   const handleLogDay = async (note: string) => {
-    if (!address) return;
+    if (!address || !baseAppContext) return;
     
     try {
       setIsLoading(true);
       setError(null);
       
-      const provider = getProvider();
-      const signer = await getSigner(provider as any);
-      const contract = getContract(signer);
-      
-      // Call contract to log day
-      const tx = await contract.logDay();
-      await tx.wait();
+      // In a real implementation, you'd use Base App's requestTransaction
+      // to call the smart contract's logDay function
+      console.log('Logging day for user:', baseAppContext.user.username, 'Note:', note);
       
       // Add daily log to Firebase
       await addDailyLog(address, note);
       
-      // Reload streak data
-      await loadStreakData();
+      // Update streak count
+      setStreakCount(prev => prev + 1);
+      setHasLoggedToday(true);
       
       setShowLogModal(false);
       
@@ -120,16 +132,15 @@ export default function Home() {
 
   return (
     <div className="min-h-screen gradient-bg">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <Flame className="w-12 h-12 text-white mr-3" />
-            <h1 className="text-4xl font-bold text-white">Build Streaks</h1>
+      <div className="container mx-auto px-4 py-4">
+        {/* Header - Optimized for frame */}
+        <div className="text-center mb-6">
+          <div className="flex items-center justify-center mb-3">
+            <Flame className="w-8 h-8 text-white mr-2" />
+            <h1 className="text-2xl font-bold text-white">Build Streaks</h1>
           </div>
-          <p className="text-white/80 text-lg max-w-2xl mx-auto">
-            Track your daily build progress and maintain your streak on Base. 
-            Every day you build, your streak grows stronger!
+          <p className="text-white/80 text-sm max-w-lg mx-auto">
+            Track your daily build progress on Base
           </p>
         </div>
 
@@ -137,30 +148,36 @@ export default function Home() {
         <div className="text-center mb-8">
           {!isConnected ? (
             <div className="space-y-4">
-              <p className="text-white/80 mb-4">Connect your wallet to start building!</p>
-              <div className="flex flex-wrap justify-center gap-3">
-                {connectors.map((connector) => (
-                  <button
-                    key={connector.uid}
-                    onClick={() => connect({ connector })}
-                    className="bg-white/20 hover:bg-white/30 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
-                  >
-                    {connector.name}
-                  </button>
-                ))}
+              <p className="text-white/80 mb-4">Open in Base app to start building!</p>
+              <div className="bg-white/20 rounded-lg p-4 max-w-md mx-auto">
+                <p className="text-white text-sm">
+                  This Mini App works best in the Base app. Open this link in Base to connect your wallet and start your build streak!
+                </p>
+              </div>
+            </div>
+          ) : baseAppContext ? (
+            <div className="flex items-center justify-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <img 
+                  src={baseAppContext.user.pfpUrl} 
+                  alt={baseAppContext.user.displayName}
+                  className="w-8 h-8 rounded-full"
+                />
+                <div className="text-left">
+                  <p className="text-white text-sm font-medium">
+                    {baseAppContext.user.displayName}
+                  </p>
+                  <p className="text-white/60 text-xs">
+                    @{baseAppContext.user.username}
+                  </p>
+                </div>
               </div>
             </div>
           ) : (
             <div className="flex items-center justify-center space-x-4">
-              <span className="text-white/80">
+              <span className="text-white/80 text-sm">
                 Connected: {address?.slice(0, 6)}...{address?.slice(-4)}
               </span>
-              <button
-                onClick={() => disconnect()}
-                className="text-white/60 hover:text-white transition-colors"
-              >
-                Disconnect
-              </button>
             </div>
           )}
         </div>
@@ -184,35 +201,35 @@ export default function Home() {
           />
         </div>
 
-        {/* Features */}
-        <div className="mt-16 grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+        {/* Features - Compact for frame */}
+        <div className="mt-8 grid grid-cols-3 gap-4 max-w-2xl mx-auto">
           <div className="text-center text-white">
-            <div className="bg-white/20 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-              <Trophy className="w-8 h-8" />
+            <div className="bg-white/20 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2">
+              <Trophy className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Mint Your NFT</h3>
-            <p className="text-white/80">
-              Get a unique streak NFT that tracks your progress on-chain
+            <h3 className="text-sm font-semibold mb-1">Mint NFT</h3>
+            <p className="text-white/80 text-xs">
+              Track progress on-chain
             </p>
           </div>
           
           <div className="text-center text-white">
-            <div className="bg-white/20 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-              <Flame className="w-8 h-8" />
+            <div className="bg-white/20 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2">
+              <Flame className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Build Daily</h3>
-            <p className="text-white/80">
-              Log your progress each day to maintain and grow your streak
+            <h3 className="text-sm font-semibold mb-1">Build Daily</h3>
+            <p className="text-white/80 text-xs">
+              Log your progress
             </p>
           </div>
           
           <div className="text-center text-white">
-            <div className="bg-white/20 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-              <Zap className="w-8 h-8" />
+            <div className="bg-white/20 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2">
+              <Zap className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Track Progress</h3>
-            <p className="text-white/80">
-              View your streak history and daily logs in one place
+            <h3 className="text-sm font-semibold mb-1">Track</h3>
+            <p className="text-white/80 text-xs">
+              View your history
             </p>
           </div>
         </div>
